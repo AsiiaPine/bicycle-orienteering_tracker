@@ -7,8 +7,8 @@
 #include <run.h>
 
 struct RunFrameData {
-    Time time_left;
-    Time time_from_start;
+    Time time_left = {0, 0};
+    Time time_from_start = {0, 0};
     uint16_t distance_from_reset;
     uint16_t distance_from_reset_scaled;
     uint16_t distance_from_start;
@@ -25,14 +25,14 @@ struct RunFrameData {
     }
 
     void update(RunData run_data) {
-        auto run_time = millis() / 1000 - run_data.get_remaining_time();
-        time_from_start.hour = run_time / 3600;
-        time_from_start.minute = (run_time / 60) % 60;
-        distance_from_start = run_data.get_remaining_distance();
-        distance_from_reset = run_data.get_last_reset_distance();
-        distance_from_reset_scaled = run_data.get_last_reset_distance_scaled();
-        percent = run_data.get_percent();
-        distance_remaining = run_data.get_remaining_distance();
+        // auto run_time = millis() / 1000 - run_data.get_remaining_time();
+        // time_from_start.hour = run_time / 3600;
+        // time_from_start.minute = (run_time / 60) % 60;
+        // distance_from_start = run_data.get_remaining_distance();
+        // distance_from_reset = run_data.get_last_reset_distance();
+        // distance_from_reset_scaled = run_data.get_last_reset_distance_scaled();
+        // percent = run_data.get_percent();
+        // distance_remaining = run_data.get_remaining_distance();
         draw();
     }
 
@@ -41,24 +41,17 @@ struct RunFrameData {
       display.setTextSize(1);
       display.setTextColor(WHITE);
       display.setCursor(2, 2);
-      if (time_left.hour < 10) {
-        display.print("0");
-      }
+      if (time_left.hour < 10) display.print("0");
       display.print(time_left.hour);
       display.print(":");
-      if (time_left.hour < 10) {
-        display.print("0");
-      }
+      if (time_left.minute < 10) display.print("0");
       display.print(time_left.minute);
+
       display.setCursor(64 + 27, 2);
-      if (time_left.hour < 10) {
-        display.print("0");
-      }
+      if (time_from_start.hour < 10) display.print("0");
       display.print(time_from_start.hour);
       display.print(":");
-      if (time_left.hour < 10) {
-        display.print("0");
-      }
+      if (time_from_start.minute < 10) display.print("0");
       display.print(time_from_start.minute);
     }
 

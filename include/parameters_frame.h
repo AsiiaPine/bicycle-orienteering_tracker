@@ -5,16 +5,20 @@
 #include <drawings.h>
 #include <parameters.h>
 
-enum ParametersNames {
+enum RowsNames {
   START,
   CONTINUE,
   TIME_LIMIT,
   LENGTH,
   DIAMETER,
-  SCALE
+  MAP_SCALE,
+  NUM_ROWS
 };
 
 struct ParametersFrameData {
+  bool ToStart = false;
+  bool ToContinue = false;
+
     void draw() {
       display.clearDisplay();
       draw_rows();
@@ -24,33 +28,35 @@ struct ParametersFrameData {
     void update();
 
     void save_parameters(ParametersInterface *param_int) {
-        param_int->distance_km = values[ParametersNames::LENGTH];
-        param_int->wheel_diameter_mm = values[ParametersNames::DIAMETER];
-        param_int->scale = values[ParametersNames::SCALE];
-        param_int->time_limit_h = values[ParametersNames::TIME_LIMIT];
-        param_int->save();
+      param_int->set(ParametersNames::DISTANCE_KM, values[RowsNames::LENGTH]);
+      param_int->set(ParametersNames::WHEEL_DIAMETER_MM, values[RowsNames::DIAMETER]);
+      param_int->set(ParametersNames::SCALE, values[RowsNames::MAP_SCALE]);
+      param_int->set(ParametersNames::TIME_LIMIT_H, values[RowsNames::TIME_LIMIT]);
+      param_int->save();
     }
 
     void load_parameters(ParametersInterface *param_int) {
-        values[ParametersNames::LENGTH] = param_int->distance_km;
-        values[ParametersNames::DIAMETER] = param_int->wheel_diameter_mm;
-        values[ParametersNames::SCALE] = param_int->scale;
-        values[ParametersNames::TIME_LIMIT] = param_int->time_limit_h;
+        values[RowsNames::LENGTH] = param_int->get(ParametersNames::DISTANCE_KM);
+        values[RowsNames::DIAMETER] = param_int->get(ParametersNames::WHEEL_DIAMETER_MM);
+        values[RowsNames::MAP_SCALE] = param_int->get(ParametersNames::SCALE);
+        values[RowsNames::TIME_LIMIT] = param_int->get(ParametersNames::TIME_LIMIT_H);
     }
 
-    void get_parameter(ParametersNames name, uint16_t *value) {
+    void get_parameter(RowsNames name, uint16_t *value) {
         *value = values[name];
     }
 
-    void set_parameter(ParametersNames name, uint16_t value) {
+    void set_parameter(RowsNames name, uint16_t value) {
         values[name] = value;
     }
 
     void increase_value() {
       if (row < 2) {
+        if (row == 0) ToStart = true;
+        if (row == 1) ToContinue = true;
         return;
       }
-      if (strcmp(names[row], "Diameter, mm")) {
+      if (strcmp(names[row], "Diameter, mm") == 0) {
         values[row] += 10;
         return;
       }
@@ -61,7 +67,7 @@ struct ParametersFrameData {
       if (row < 2) {
         return;
       }
-      if (strcmp(names[row], "Diameter, mm")) {
+      if (strcmp(names[row], "Diameter, mm") == 0) {
         values[row] -= 10;
         return;
       }
@@ -83,10 +89,11 @@ struct ParametersFrameData {
     }
 
  private:
-    char names[6][LINE_CHAR_LENGTH - 4] =
+    char names[RowsNames::NUM_ROWS][LINE_CHAR_LENGTH - 4] =
       {"Start", "Continue", "Time limit, h", "Length, km", "Diameter, mm", "Scale, m/cm"};
-    uint16_t values[8];
+    uint16_t values[NUM_ROWS];
     const uint8_t values_offset = 80;
+
     uint8_t row = 0;
     void draw_rows() {
       display.setTextSize(1);

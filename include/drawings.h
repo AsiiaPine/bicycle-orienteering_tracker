@@ -81,9 +81,7 @@ void write_string(const char *str) {
 
 void setup_display()   {
   display.display();
-  delay(2000);
   display.clearDisplay();
-  // testdrawchar();
 }
 
 #endif  // DRAWINGS_H
