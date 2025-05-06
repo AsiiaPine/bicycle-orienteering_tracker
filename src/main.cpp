@@ -1,17 +1,19 @@
 
-#include <drawings.h>
-#include <buttons.h>
-#include <parameters.h>
-#include <run.h>
-#include <parameters_frame.h>
-#include <buttons_actions.h>
+// #include <drawings.h>
+// #include <buttons.h>
+// #include <parameters.h>
+// #include <run.h>
+// #include <parameters_frame.h>
+// #include <buttons_actions.h>
 
-#include <state.h>
+#include "display.h"
+#include "input.h"
+#include "state.h"
 
 #define INT0_PIN 5
 
-#define SCL_PIN   A5
-#define SDA_PIN   A4
+#define SCL_PIN A5
+#define SDA_PIN A4
 
 volatile byte counter = 0;
 
@@ -19,30 +21,28 @@ volatile byte counter = 0;
 // ParametersInterface param_int;
 // RunFrameData run_frame;
 // ParametersFrameData parameters_frame;
-ButtonsActions buttons_actions;
+// ButtonsActions buttons_actions;
 
 void setup() {
   Serial.begin(9600);
+  Serial.println("setup()");
+  // delay(500);
 
-  display.begin(SH1106_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D (for the 128x64)
-  setup_display();
-  delay(500);
-  Serial.println("Setup display\n");
+  STATE.load_parameters();
 
-  setup_buttons();
-  Serial.println("Setup buttons\n");
-  delay(500);
+  // --- Use this section to reset parameters ---
+  // STATE.scale = 25;
+  // STATE.wheel_diameter = 2200;
 
-  state.init();
-  Serial.println("State init\n");
+  // initialize with the I2C addr 0x3D (for the 128x64)
+  display.begin(SH1106_SWITCHCAPVCC, 0x3C);
 
-  buttons_actions.setup();
-  delay(500);
-  Serial.println("Run data set\n");
+  setup_input();
+  run_reset();
 }
 
 void loop() {
-  buttons_actions.update_state();
-  // run_data.update();
-  // delay(1000);
+  run_update();
+  handle_buttons();
+  draw_frame();
 }

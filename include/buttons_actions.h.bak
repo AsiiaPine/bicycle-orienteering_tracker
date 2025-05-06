@@ -1,0 +1,86 @@
+#ifndef BUTTONS_ACTIONS_H
+#define BUTTONS_ACTIONS_H
+
+#include <buttons.h>
+#include <parameters_frame.h>
+#include <reed_switch.h>
+#include <run_frame.h>
+#include <state.h>
+
+
+
+struct ButtonsActions {
+ private:
+  FrameNum frame_num = RUN_FRAME;
+
+  bool left_top_pressed = false;
+  bool left_bot_pressed = false;
+  bool right_top_pressed = false;
+  bool right_bot_pressed = false;
+
+ public:
+  void handle_buttons() {
+    Serial.println("us");
+    delay(50);
+
+    
+
+    Serial.println("us 2");
+    delay(50);
+
+    // display.println(left_top_pressed);
+    // display.println(left_bot_pressed);
+    // display.println(right_top_pressed);
+    // display.println(right_bot_pressed);
+
+    // Serial.println("us 3");
+    // delay(50);
+
+    // display.display();
+
+    // Serial.println("us 4");
+    // delay(50);
+
+    
+    Serial.println("us 8");
+    delay(50);
+
+    STATE.update_run_frame();
+
+    Serial.println("us 9");
+    delay(50);
+  }
+
+ private:
+  void parameters_frame_callback() {
+    if (left_top_pressed) {
+      STATE.parameters_frame.prev_row();
+      return;
+    }
+    if (left_bot_pressed) {
+      STATE.parameters_frame.next_row();
+      return;
+    }
+    if (right_top_pressed) {
+      STATE.parameters_frame.increase_value();
+      return;
+    }
+    if (right_bot_pressed) {
+      STATE.parameters_frame.decrease_value();
+    }
+  }
+
+  void change_frame() {
+    if (frame_num == PARAM_FRAME) {
+      STATE.save_parameters();
+      frame_num = RUN_FRAME;
+      return;
+    }
+    frame_num = PARAM_FRAME;
+    STATE.load_parameters();
+  }
+
+  void run_frame_callback() {}
+};
+
+#endif  // BUTTONS_ACTIONS_H
