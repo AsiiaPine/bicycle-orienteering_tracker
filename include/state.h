@@ -3,10 +3,6 @@
 
 #include <Arduino.h>
 #include <storage.h>
-// #include <parameters.h>
-// #include <parameters_frame.h>
-// #include <run.h>
-// #include <run_frame.h>
 
 volatile uint8_t reed_switch_callback_counter = 0;
 
@@ -61,7 +57,6 @@ struct State {
       current_row = 0;
     }
   }
-
 };
 
 State STATE;
