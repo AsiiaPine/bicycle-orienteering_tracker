@@ -85,5 +85,7 @@ The row contains the following elements:
 
 The value can be changed by using the up and down buttons on the right side of the screen.
 
+To scroll between the rows, use the up and down buttons on the left side of the screen.
+
 The values will be saved when user changes frame from parameters to run.
 

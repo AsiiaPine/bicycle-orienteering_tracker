@@ -8,7 +8,7 @@
 
 uint16_t last_counter = 0;
 
-
+// Update run data based on interrupts counter
 void run_update() {
   if (reed_switch_callback_counter == last_counter) {
     return;
@@ -36,8 +36,8 @@ void run_update() {
   STATE.passed_distance += delta_distance_m;
 }
 
+// Reset (or lap) maker
 void run_reset() {
-  // Reset (or lap) maker
   STATE.lap_distance = 0;
   STATE.passed_distance = 0;
   STATE.start_time = millis() / 1000;

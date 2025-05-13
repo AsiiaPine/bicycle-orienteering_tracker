@@ -21,7 +21,8 @@ Adafruit_SH1106 display(OLED_RESET);
 #define LINE_CHAR_HEIGHT 8
 
 void draw_parameters_frame() {
-  // Draw selected row indicator
+  // Draw selected row indicator - round rectangle.
+  // The indicator is filled with white color. If the row is selected, the text color is black.
   display.fillRoundRect(0, 1 + STATE.current_row * 10, DISPLAY_WIDTH, 10, 2,
                         WHITE);
 
@@ -71,6 +72,7 @@ void draw_parameters_frame() {
 }
 
 void draw_run_frame() {
+  // Calculate printable values
   uint32_t elapsed_seconds = millis() / 1000 - STATE.start_time;
   uint8_t elapsed_hours = elapsed_seconds / 3600;
   uint8_t elapsed_minutes = (elapsed_seconds / 60) % 60;
@@ -79,6 +81,19 @@ void draw_run_frame() {
   uint16_t remaining_seconds = STATE.time_limit - elapsed_seconds;
   uint8_t remaining_hours = remaining_seconds / 3600;
   uint8_t remaining_minutes = (remaining_seconds / 60) % 60;
+
+  uint16_t lap_distance_scaled = STATE.lap_distance / STATE.scale;
+  uint16_t passed_distance_100m = STATE.passed_distance / 100;
+  float desired_passed_distance = STATE.desired_mean_speed * elapsed_seconds;
+
+  int8_t percent = 0;
+  // If elapsed time is less than 10 seconds, then don't calculate percentage,
+  // because desired_passed_distance might be so small that it will be rounded to zero.
+
+  if (elapsed_seconds > 10) {
+    auto pct = static_cast<int>(((STATE.passed_distance - desired_passed_distance) * 100) / (desired_passed_distance));
+    percent = clamp(pct, -100, 100);
+  }
 
   // First line
   display.setTextSize(1);
@@ -131,9 +146,8 @@ void draw_run_frame() {
 
   display.print("-");
 
-  // Printing scaled distance like in map
-  uint16_t lap_distance_scaled = STATE.lap_distance / STATE.scale;
 
+  // Printing scaled distance like in map
   if (lap_distance_scaled < 100) {
     display.print(" ");
   }
@@ -162,7 +176,6 @@ void draw_run_frame() {
   display.setCursor(0, 47);
 
   // Printing passed distance in km
-  uint16_t passed_distance_100m = STATE.passed_distance / 100;
   if (passed_distance_100m < 100) {
     display.setCursor(12, 47);
   }
@@ -172,13 +185,6 @@ void draw_run_frame() {
     display.setCursor(24, 47);
   }
   display.print(passed_distance_100m);
-
-  int8_t percent = 0;
-  if (elapsed_seconds > 30) {
-    auto desired = STATE.desired_mean_speed * elapsed_seconds;
-    auto pct = static_cast<int>(((STATE.passed_distance - desired) * 100) / (desired));
-    percent = clamp(pct, -100, 100);
-  }
 
   display.setCursor(40, 47);
 
@@ -215,9 +221,11 @@ void draw_run_frame() {
   display.print(distance_remaining_100m);
 }
 
+// Draw current frame
 void draw_frame() {
   display.clearDisplay();
 
+  // Check which frame to draw
   if (STATE.current_frame == PARAM_FRAME) {
     draw_parameters_frame();
   } else {

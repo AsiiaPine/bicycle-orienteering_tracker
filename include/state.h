@@ -29,6 +29,7 @@ struct State {
   // --- parameters screen ---
   uint8_t current_row;
 
+  // Save parameters to EEPROM
   void save_parameters() {
     save_uint16(wheel_diameter, 0);
     save_uint32(time_limit, 2);
@@ -36,6 +37,7 @@ struct State {
     save_uint32(total_distance, 8);
   }
 
+  // Load parameters from EEPROM
   void load_parameters() {
     wheel_diameter = load_uint16(0);
     time_limit = load_uint32(2);
@@ -43,16 +45,17 @@ struct State {
     total_distance = load_uint32(8);
   }
 
+  // Compute desired mean speed based on total distance and time limit (m/s)
   inline void compute_desired_mean_speed() {
     desired_mean_speed = static_cast<float>(total_distance) / time_limit;
   }
 
+  // Change current frame, on parameters screen, change to run screen and save parameters
   void change_frame() {
     if (current_frame == PARAM_FRAME) {
       current_frame = RUN_FRAME;
       save_parameters();
       compute_desired_mean_speed();
-
     } else {
       current_frame = PARAM_FRAME;
       current_row = 0;

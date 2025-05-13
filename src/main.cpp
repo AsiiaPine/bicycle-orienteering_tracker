@@ -13,9 +13,11 @@ void setup() {
 
   STATE.load_parameters();
 
-  // --- Use this section to reset parameters ---
+  // --- Use this section to reset parameters to default---
   // STATE.scale = 25;
   // STATE.wheel_diameter = 2200;
+  // STATE.time_limit = 300;
+  // STATE.total_distance = 10000;
 
   // initialize with the I2C addr 0x3D (for the 128x64)
   display.begin(SH1106_SWITCHCAPVCC, 0x3C);
