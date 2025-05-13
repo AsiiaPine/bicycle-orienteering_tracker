@@ -31,21 +31,22 @@ struct State {
 
   void save_parameters() {
     save_uint16(wheel_diameter, 0);
-    save_uint16(time_limit, 2);
-    save_uint16(scale, 4);
-    save_uint32(total_distance, 6);
+    save_uint32(time_limit, 2);
+    save_uint16(scale, 6);
+    save_uint32(total_distance, 8);
   }
 
   void load_parameters() {
     wheel_diameter = load_uint16(0);
-    time_limit = load_uint16(2);
-    scale = load_uint16(4);
-    total_distance = load_uint32(6);
+    time_limit = load_uint32(2);
+    scale = load_uint16(6);
+    total_distance = load_uint32(8);
   }
 
   void change_frame() {
     if (current_frame == PARAM_FRAME) {
       current_frame = RUN_FRAME;
+      save_parameters();
     } else {
       current_frame = PARAM_FRAME;
       current_row = 0;
