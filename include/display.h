@@ -1,19 +1,29 @@
 #pragma once
 
-#include "consts.h"
-#include "draw.h"
-#include "state.h"
+#include <Adafruit_GFX.h>
+#include <Adafruit_SH1106.h>
+#include <consts.h>
+#include <state.h>
+#include <algorithms.h>
+
+// --- Hardware ---
+#define OLED_RESET 4
+#define SCL_PIN A5
+#define SDA_PIN A4
+Adafruit_SH1106 display(OLED_RESET);
+
+// --- Display ---
+#define DISPLAY_HEIGHT 64
+#define DISPLAY_WIDTH 128
+
+// --- Text ---
+#define LINE_CHAR_LENGTH 21
+#define LINE_CHAR_HEIGHT 8
 
 void draw_parameters_frame() {
-  // Draw distance row
-  // uint8_t distance_value_km = STATE.total_distance / 1000;
-  // display.text(distance_value_km);
-
   // Draw selected row indicator
   display.fillRoundRect(0, 1 + STATE.current_row * 10, DISPLAY_WIDTH, 10, 2,
                         WHITE);
-
-  // TODO: print values
 
   display.setTextSize(1);
 
@@ -61,7 +71,7 @@ void draw_parameters_frame() {
 }
 
 void draw_run_frame() {
-  uint16_t elapsed_seconds = millis() / 1000 - STATE.start_time;
+  uint32_t elapsed_seconds = millis() / 1000 - STATE.start_time;
   uint8_t elapsed_hours = elapsed_seconds / 3600;
   uint8_t elapsed_minutes = (elapsed_seconds / 60) % 60;
   uint8_t elapsed_seconds_mod = elapsed_seconds % 60;
@@ -70,6 +80,7 @@ void draw_run_frame() {
   uint8_t remaining_hours = remaining_seconds / 3600;
   uint8_t remaining_minutes = (remaining_seconds / 60) % 60;
 
+  // First line
   display.setTextSize(1);
   display.setTextColor(WHITE);
   display.setCursor(2, 2);
@@ -78,7 +89,8 @@ void draw_run_frame() {
   display.print(":");
   if (elapsed_minutes < 10) display.print("0");
   display.print(elapsed_minutes);
-  // TODO: remove me plz
+
+  // TODO: remove me if you don't want to see seconds
   display.print(":");
   if (elapsed_seconds_mod < 10) display.print("0");
   display.print(elapsed_seconds_mod);
@@ -90,18 +102,36 @@ void draw_run_frame() {
   if (remaining_minutes < 10) display.print("0");
   display.print(remaining_minutes);
 
+  // Second line
   display.setTextSize(3);
   display.setTextColor(WHITE);
   display.setCursor(2, 16);
-  if (STATE.lap_distance < 100) {
+  // Printing distance in meters
+  auto lap_distance = STATE.lap_distance;
+  if (lap_distance < 100) {
     display.print(" ");
   }
-  if (STATE.lap_distance < 10) {
+  if (lap_distance < 10) {
     display.print(" ");
   }
-  display.print(STATE.lap_distance);
+
+  if (lap_distance > 1000) {
+    if (lap_distance / 10000 == 0) {
+      display.fillCircle(20, 40, 1, WHITE);
+      lap_distance = lap_distance / 10;
+    } else {
+      display.fillCircle(38, 40, 1, WHITE);
+      lap_distance = lap_distance / 100;
+      if (lap_distance > 999) {
+        lap_distance = 999;
+      }
+    }
+  }
+  display.print(lap_distance);
+
   display.print("-");
 
+  // Printing scaled distance like in map
   uint16_t lap_distance_scaled = STATE.lap_distance / STATE.scale;
 
   if (lap_distance_scaled < 100) {
@@ -110,27 +140,49 @@ void draw_run_frame() {
   if (lap_distance_scaled < 10) {
     display.print(" ");
   }
+
+  if (lap_distance_scaled > 1000) {
+    if (lap_distance_scaled / 10000 == 0) {
+      display.fillCircle(92, 40, 1, WHITE);
+      lap_distance_scaled = lap_distance_scaled / 10;
+    } else {
+      display.fillCircle(108, 40, 1, WHITE);
+      lap_distance_scaled = lap_distance_scaled / 100;
+    }
+    if (lap_distance_scaled > 999) {
+      lap_distance_scaled = 999;
+    }
+  }
+
   display.print(lap_distance_scaled);
 
-  uint16_t passed_distance_100m = STATE.passed_distance / 100;
-
+  // third line
   display.setTextSize(2);
   display.setTextColor(WHITE);
-  display.fillCircle(24, 61, 1, WHITE);
   display.setCursor(0, 47);
+
+  // Printing passed distance in km
+  uint16_t passed_distance_100m = STATE.passed_distance / 100;
   if (passed_distance_100m < 100) {
     display.setCursor(12, 47);
   }
   if (passed_distance_100m < 10) {
     display.print(0);
+    display.fillCircle(24, 61, 1, WHITE);
     display.setCursor(24, 47);
   }
   display.print(passed_distance_100m);
 
-  auto desired = STATE.desired_mean_speed * elapsed_seconds;
-  int8_t percent = (int8_t)(STATE.passed_distance - desired) * 100 / (desired);
+  int8_t percent = 0;
+  if (elapsed_seconds > 30) {
+    auto desired = STATE.desired_mean_speed * elapsed_seconds;
+    auto pct = static_cast<int>(((STATE.passed_distance - desired) * 100) / (desired));
+    percent = clamp(pct, -100, 100);
+  }
 
   display.setCursor(40, 47);
+
+  // Printing percent
   uint8_t abs_percent = 0;
   if (percent > 0) {
     display.print(" ");
@@ -147,15 +199,16 @@ void draw_run_frame() {
   display.print("%");
   display.setTextSize(2);
 
+  // Printing distance remaining in km
   uint16_t distance_remaining_100m =
       (STATE.total_distance - STATE.passed_distance) / 100;
-  display.fillCircle(111, 61, 1, WHITE);
   display.setCursor(87, 47);
   if (distance_remaining_100m < 100) {
     display.setCursor(99, 47);
   }
   if (distance_remaining_100m < 10) {
     display.print(0);
+    display.fillCircle(111, 61, 1, WHITE);
     display.setCursor(111, 47);
   }
 

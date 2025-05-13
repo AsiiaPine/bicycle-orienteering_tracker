@@ -64,7 +64,7 @@ inline void handle_parameters_screen_input(bool right_top_pressed,
       STATE.current_row--;
     } else {
       STATE.current_row = PARAM_FRAME_ROWS - 1;
-    };
+    }
     return;
   }
   if (left_bottom_pressed) {
@@ -78,24 +78,22 @@ inline void handle_parameters_screen_input(bool right_top_pressed,
   if (STATE.current_row == ROW_START) {
     if (right_top_pressed || right_bottom_pressed) {
       run_reset();
-      STATE.current_frame = RUN_FRAME;
+      STATE.change_frame();
     }
     return;
   }
   if (STATE.current_row == ROW_CONTINUE) {
     if (right_top_pressed || right_bottom_pressed) {
-      STATE.current_frame = RUN_FRAME;
+      STATE.change_frame();
     }
     return;
   }
   if (STATE.current_row == ROW_TIME_LIMIT) {
     if (right_top_pressed) {
       STATE.time_limit += 3600;
-      compute_desired_mean_speed();
     }
     if (right_bottom_pressed) {
       STATE.time_limit -= 3600;
-      compute_desired_mean_speed();
     }
 
     return;
@@ -103,18 +101,16 @@ inline void handle_parameters_screen_input(bool right_top_pressed,
   if (STATE.current_row == ROW_TOTAL_DISTANCE) {
     if (right_top_pressed) {
       STATE.total_distance += 1000;
-      compute_desired_mean_speed();
     }
     if (right_bottom_pressed) {
       STATE.total_distance -= 1000;
-      compute_desired_mean_speed();
     }
 
     return;
   }
   if (STATE.current_row == ROW_WHEEL_DIAMETER) {
-    if (right_top_pressed) STATE.wheel_diameter += 100;
-    if (right_bottom_pressed) STATE.wheel_diameter -= 100;
+    if (right_top_pressed) STATE.wheel_diameter += 10;
+    if (right_bottom_pressed) STATE.wheel_diameter -= 10;
     return;
   }
   if (STATE.current_row == ROW_MAP_SCALE) {
@@ -128,7 +124,7 @@ inline void handle_run_screen_input(bool right_top_pressed,
                                     bool right_bot_pressed,
                                     bool left_top_pressed,
                                     bool left_bottom_pressed) {
-  if (right_top_pressed && right_bot_pressed) {
+  if (right_top_pressed || right_bot_pressed) {
     STATE.lap_distance = 0;
   }
 }
@@ -146,7 +142,6 @@ void handle_buttons() {
 
   if (left_top_pressed && left_bot_pressed) {
     STATE.change_frame();
-    STATE.save_parameters();
     return;
   }
 

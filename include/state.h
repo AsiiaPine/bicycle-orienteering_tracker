@@ -18,7 +18,7 @@ struct State {
   uint32_t time_limit;          // in seconds
   uint16_t scale;               // meters/centimeters
   uint32_t total_distance;      // in meters
-  uint16_t desired_mean_speed;  // in meters per second
+  float desired_mean_speed;  // in meters per second
 
   // --- variables ---
   FrameNum current_frame = PARAM_FRAME;
@@ -43,15 +43,22 @@ struct State {
     total_distance = load_uint32(8);
   }
 
+  inline void compute_desired_mean_speed() {
+    desired_mean_speed = static_cast<float>(total_distance) / time_limit;
+  }
+
   void change_frame() {
     if (current_frame == PARAM_FRAME) {
       current_frame = RUN_FRAME;
       save_parameters();
+      compute_desired_mean_speed();
+
     } else {
       current_frame = PARAM_FRAME;
       current_row = 0;
     }
   }
+
 };
 
 State STATE;
