@@ -1,4 +1,4 @@
-# velo
+# Tracker for bicycle orienteering
 
 A simple project to test the Arduino Nano ATmega328 board. Used for velo run tracking.
 
