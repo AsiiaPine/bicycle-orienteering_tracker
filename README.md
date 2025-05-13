@@ -12,6 +12,15 @@ The PlatformIO IDE is an extension for VSCode and can be used on all platforms. 
 
 It allows to build/upload the code to the board, debug it and read the serial output from the board.
 
+### Hardware
+
+Arduino Nano, OLED 1.30" 128x64 I2C display, reed switch, buttons.
+
+Pinout:
+* Buttons - D12, D11, D10, D9
+* Reed switch - D2
+* OLED - SDA - A4, SCL - A5
+
 ### Structure
 
 The project is structured as follows:
