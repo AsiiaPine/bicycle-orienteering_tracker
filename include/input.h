@@ -132,8 +132,8 @@ inline void handle_parameters_screen_input(bool right_top_pressed,
     return;
   }
   if (STATE.current_row == ROW_WHEEL_DIAMETER) {
-    if (right_top_pressed) STATE.wheel_diameter += 10;
-    if (right_bottom_pressed) STATE.wheel_diameter -= 10;
+    if (right_top_pressed) STATE.wheel_diameter += 1;
+    if (right_bottom_pressed) STATE.wheel_diameter -= 1;
     return;
   }
   if (STATE.current_row == ROW_MAP_SCALE) {

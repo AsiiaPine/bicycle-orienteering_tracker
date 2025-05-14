@@ -34,8 +34,8 @@ struct State {
 
   // --- variables ---
   FrameNum current_frame = PARAM_FRAME;
-  uint16_t passed_distance = 0;  // in meters
-  uint16_t lap_distance = 0;     // in meters
+  uint32_t passed_distance = 0;  // in millimeters
+  uint32_t lap_distance = 0;     // in millimeters
   uint16_t start_time = 0;       // in seconds
 
   // --- parameters screen ---

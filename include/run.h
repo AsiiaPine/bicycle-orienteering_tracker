@@ -31,8 +31,6 @@ void run_update() {
     return;
   }
 
-  Serial.println(reed_switch_callback_counter);
-
   uint8_t delta_count = reed_switch_callback_counter - last_counter;
   // the counter can go up to 255 and then it goes back to 0. So, we need to
   // catch the moment when it reaches 127 to not loose any interrupt
@@ -48,9 +46,10 @@ void run_update() {
     last_counter = reed_switch_callback_counter;
   }
 
-  uint16_t delta_distance_m = delta_count * STATE.wheel_diameter * PI / 1000;
-  STATE.lap_distance += delta_distance_m;
-  STATE.passed_distance += delta_distance_m;
+  uint32_t delta_distance_mm = delta_count * STATE.wheel_diameter * PI;
+  STATE.lap_distance += delta_distance_mm;
+  STATE.passed_distance += delta_distance_mm;
+  Serial.println(delta_distance_mm);
 }
 
 // Reset (or lap) maker

@@ -99,17 +99,18 @@ void draw_run_frame() {
   uint8_t remaining_hours = remaining_seconds / 3600;
   uint8_t remaining_minutes = (remaining_seconds / 60) % 60;
 
-  uint16_t lap_distance_scaled = STATE.lap_distance / STATE.scale;
-  uint16_t passed_distance_100m = STATE.passed_distance / 100;
+  uint16_t lap_distance_scaled = (STATE.lap_distance)/1000 / STATE.scale;
+  uint16_t passed_distance_km = STATE.passed_distance / 1000000;
   float desired_passed_distance = STATE.desired_mean_speed * elapsed_seconds;
 
-  int8_t percent = 0;
+  int16_t percent = 0;
   // If elapsed time is less than 10 seconds, then don't calculate percentage,
   // because desired_passed_distance might be so small that it will be rounded to zero.
 
   if (elapsed_seconds > 10) {
-    auto pct = static_cast<int>(((STATE.passed_distance - desired_passed_distance) * 100) / (desired_passed_distance));
-    percent = clamp(pct, -100, 100);
+    auto pct = static_cast<int>(
+          ((STATE.passed_distance / 1000 - desired_passed_distance)) / 1000);
+    percent = clamp(pct, -1000, 1000);
   }
 
   // First line
@@ -135,73 +136,81 @@ void draw_run_frame() {
   display.print(remaining_minutes);
 
   // Second line
-  display.setTextSize(3);
+  display.setTextSize(2);
   display.setTextColor(WHITE);
   display.setCursor(2, 16);
   // Printing distance in meters
-  auto lap_distance = STATE.lap_distance;
-  if (lap_distance < 100) {
-    display.print(" ");
-  }
-  if (lap_distance < 10) {
-    display.print(" ");
-  }
+  auto lap_distance = STATE.lap_distance / 1000;
 
-  if (lap_distance > 1000) {
-    if (lap_distance / 10000 == 0) {
-      display.fillCircle(20, 40, 1, WHITE);
-      lap_distance = lap_distance / 10;
-    } else {
-      display.fillCircle(38, 40, 1, WHITE);
-      lap_distance = lap_distance / 100;
-      if (lap_distance > 999) {
-        lap_distance = 999;
-      }
-    }
-  }
+  // if (lap_distance < 10000) {
+  //   display.print(" ");
+  // }
+  // if (lap_distance < 1000) {
+  //   display.print(" ");
+  // }
+  // if (lap_distance < 100) {
+  //   display.print(" ");
+  // }
+  // if (lap_distance < 10) {
+  //   display.print(" ");
+  // }
+
+  // if (lap_distance > 1000) {
+  //   if (lap_distance / 10000 == 0) {
+  //     display.fillCircle(20, 40, 1, WHITE);
+  //     lap_distance = lap_distance / 10;
+  //   } else {
+  //     display.fillCircle(38, 40, 1, WHITE);
+  //     lap_distance = lap_distance / 100;
+  //     if (lap_distance > 999) {
+  //       lap_distance = 999;
+  //     }
+  //   }
+  // }
   display.print(lap_distance);
 
-  display.print("-");
+  display.setCursor(60, 16);
+  display.print("- ");
 
 
-  // Printing scaled distance like in map
-  if (lap_distance_scaled < 100) {
-    display.print(" ");
-  }
-  if (lap_distance_scaled < 10) {
-    display.print(" ");
-  }
+  // // Printing scaled distance like in map
+  // if (lap_distance_scaled < 100) {
+  //   display.print(" ");
+  // }
+  // if (lap_distance_scaled < 10) {
+  //   display.print(" ");
+  // }
 
-  if (lap_distance_scaled > 1000) {
-    if (lap_distance_scaled / 10000 == 0) {
-      display.fillCircle(92, 40, 1, WHITE);
-      lap_distance_scaled = lap_distance_scaled / 10;
-    } else {
-      display.fillCircle(108, 40, 1, WHITE);
-      lap_distance_scaled = lap_distance_scaled / 100;
-    }
-    if (lap_distance_scaled > 999) {
-      lap_distance_scaled = 999;
-    }
-  }
+  // if (lap_distance_scaled > 1000) {
+  //   if (lap_distance_scaled / 10000 == 0) {
+  //     display.fillCircle(92, 40, 1, WHITE);
+  //     lap_distance_scaled = lap_distance_scaled / 10;
+  //   } else {
+  //     display.fillCircle(108, 40, 1, WHITE);
+  //     lap_distance_scaled = lap_distance_scaled / 100;
+  //   }
+  //   if (lap_distance_scaled > 999) {
+  //     lap_distance_scaled = 999;
+  //   }
+  // }
 
   display.print(lap_distance_scaled);
 
   // third line
-  display.setTextSize(2);
+  display.setTextSize(1);
   display.setTextColor(WHITE);
   display.setCursor(0, 47);
 
   // Printing passed distance in km
-  if (passed_distance_100m < 100) {
-    display.setCursor(12, 47);
-  }
-  if (passed_distance_100m < 10) {
-    display.print(0);
-    display.fillCircle(24, 61, 1, WHITE);
-    display.setCursor(24, 47);
-  }
-  display.print(passed_distance_100m);
+  // if (passed_distance_km < 100) {
+  //   display.setCursor(12, 47);
+  // }
+  // if (passed_distance_km < 10) {
+  //   display.print(0);
+  //   display.fillCircle(24, 61, 1, WHITE);
+  //   display.setCursor(24, 47);
+  // }
+  display.print(passed_distance_km);
 
   display.setCursor(40, 47);
 
@@ -218,24 +227,24 @@ void draw_run_frame() {
     display.print("-");
   }
   display.print(abs_percent);
-  display.setTextSize(1);
-  display.print("%");
-  display.setTextSize(2);
+  // display.setTextSize(1);
+  // display.print("%");
+  // display.setTextSize(2);
 
   // Printing distance remaining in km
-  uint16_t distance_remaining_100m =
-      (STATE.total_distance - STATE.passed_distance) / 100;
+  uint16_t distance_remaining_km =
+      (STATE.total_distance - STATE.passed_distance/1000) / 1000;
   display.setCursor(87, 47);
-  if (distance_remaining_100m < 100) {
-    display.setCursor(99, 47);
-  }
-  if (distance_remaining_100m < 10) {
-    display.print(0);
-    display.fillCircle(111, 61, 1, WHITE);
-    display.setCursor(111, 47);
-  }
+  // if (distance_remaining_100m < 100) {
+  //   display.setCursor(99, 47);
+  // }
+  // if (distance_remaining_100m < 10) {
+  //   display.print(0);
+  //   display.fillCircle(111, 61, 1, WHITE);
+  //   display.setCursor(111, 47);
+  // }
 
-  display.print(distance_remaining_100m);
+  display.print(distance_remaining_km);
 }
 
 // Draw current frame
